@@ -1,0 +1,37 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: prometheus
+  namespace: devops
+  labels:
+    app: prometheus
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/instance: prometheus
+    app.kubernetes.io/part-of: prometheus-app
+    app.openshift.io/runtime-namespace: devops
+spec:
+  replicas: 1
+  selector:
+    app: prometheus
+    deploymentconfig: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        deploymentconfig: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/devops/prometheus@sha256:d0710ff1c7566d1bea025a68eeb066e2d83a55df617f84fbdd4d5c8f585228f2
+          volumeMounts:
+            - name: prometheus
+              mountPath: /etc/prometheus
+            - name: prometheus-storage-volume
+              mountPath: /prometheus/
+      volumes:
+        - name: prometheus
+          configMap:
+            name: prometheus
+        - name: prometheus-storage-volume
+            emptyDir: { }
